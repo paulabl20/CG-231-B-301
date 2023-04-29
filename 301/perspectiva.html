@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Escena 3D</title>
+	<style>
+		body {
+			margin: 0;
+			overflow: hidden;
+		}
+        #text {
+            position: absolute;
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+            color: #78FF00;
+        }
+	</style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r94/three.min.js"></script>
+
+    <script type="module">
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+	
+	function rectanguloR(posicion, lado, material) {
+
+//Coordenadas
+var x = new THREE.Vector3(1, 0, 0);
+var y = new THREE.Vector3(0, 1, 0);
+var z = new THREE.Vector3(0, 0, 1);
+
+//Crea los Vertices
+var v1 = [posicion[0]           , posicion[1]       , posicion[2]           ];
+var v2 = [posicion[0]           , posicion[1] + lado, posicion[2]           ];
+var v3 = [posicion[0] + (lado*3), posicion[1] + lado, posicion[2]           ];
+var v4 = [posicion[0] + (lado*3), posicion[1]       , posicion[2]           ];
+var v5 = [posicion[0] + (lado*3), posicion[1]       , posicion[2] + (lado*2)];
+var v6 = [posicion[0] + (lado*3), posicion[1] + lado, posicion[2] + (lado*2)];
+var v7 = [posicion[0]           , posicion[1] + lado, posicion[2] + (lado*2)];
+var v8 = [posicion[0]           , posicion[1]       , posicion[2] + (lado*2)];
+
+//Caras que generan el Rectangulo
+var Cara1 = new THREE.Geometry();
+var vertices = [v1, v2, v3, v4, v1];
+var largo = vertices.length;
+for (var i = 0; i < largo; i++) {
+    x = vertices[i][0];
+    y = vertices[i][1];
+    z = vertices[i][2];
+    var vector = new THREE.Vector3(x, y, z);
+    Cara1.vertices.push(vector);
+}
+
+var Cara2 = new THREE.Geometry();
+var vertices = [v3, v4, v5, v6, v3];
+var largo = vertices.length;
+for (var i = 0; i < largo; i++) {
+    x = vertices[i][0];
+    y = vertices[i][1];
+    z = vertices[i][2];
+    var vector = new THREE.Vector3(x, y, z);
+    Cara2.vertices.push(vector);
+}
+
+var Cara3 = new THREE.Geometry();
+var vertices = [v5, v6, v7, v8, v5];
+var largo = vertices.length;
+for (var i = 0; i < largo; i++) {
+    x = vertices[i][0];
+    y = vertices[i][1];
+    z = vertices[i][2];
+    var vector = new THREE.Vector3(x, y, z);
+    Cara3.vertices.push(vector);
+}
+
+var Cara4 = new THREE.Geometry();
+var vertices = [v1, v2, v7, v8, v1];
+var largo = vertices.length;
+for (var i = 0; i < largo; i++) {
+    x = vertices[i][0];
+    y = vertices[i][1];
+    z = vertices[i][2];
+    var vector = new THREE.Vector3(x, y, z);
+    Cara4.vertices.push(vector);
+}
+
+//Color del Rectangulo
+var MaterialRec = new THREE.ParticleBasicMaterial({ color: material });
+ 
+ //Generacion Caras del rectangulo
+ var Lado1 = new THREE.Line(Cara1, MaterialRec);
+ var Lado2 = new THREE.Line(Cara2, MaterialRec);
+ var Lado3 = new THREE.Line(Cara3, MaterialRec);
+ var Lado4 = new THREE.Line(Cara4, MaterialRec);
+ 
+ //Arreglo cuadrados
+ var Rectangle = [Lado1, Lado2, Lado3, Lado4];
+
+ return Rectangle;
+}
+function init() {
+
+// Creacion de la Escena
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+var renderer = new THREE.WebGLRenderer();
+renderer.setClearColor(0x000000, 1.0);
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+var size = 700;
+var arrowSize = 40;
+var divisions = 20;
+var origen = new THREE.Vector3(0, 0, 0);
+var x = new THREE.Vector3(1, 0, 0);
+var y = new THREE.Vector3(0, 1, 0);
+var z = new THREE.Vector3(0, 0, 1);
+var color2 = new THREE.Color(0x333333);
+var colorR = new THREE.Color(0xAA0000);
+var colorG = new THREE.Color(0x00AA00);
+var colorB = new THREE.Color(0x0000AA);
+
+//Creacion de la Grilla
+var gridHelperXZ = new THREE.GridHelper(size, divisions, color2, color2);
+
+//Flechas
+var arrowX = new THREE.ArrowHelper(x, origen, arrowSize, colorR);
+var arrowY = new THREE.ArrowHelper(y, origen, arrowSize, colorG);
+var arrowZ = new THREE.ArrowHelper(z, origen, arrowSize, colorB);
+
+//Camara
+camera.position.x = 100;
+camera.position.y = 100;
+camera.position.z = 400;
+camera.lookAt(scene.position);
+
+// Colores
+var Material = new THREE.ParticleBasicMaterial({ color: 0x78FF00 });
+
+//Propiedades Rectangulo
+var posicion = [0, 0, 0];
+var lado = 10;
+
+//Rectangulo 
+var Rectangle  = rectanguloR(posicion, lado, Material);
+
+//En el documento HTML
+document.body.appendChild(renderer.domElement);
+
+//Agregar elementos al escenario
+scene.add(gridHelperXZ);
+scene.add(arrowX);
+scene.add(arrowY);
+scene.add(arrowZ);
+scene.add(Rectangle[0]);
+scene.add(Rectangle[1]);
+scene.add(Rectangle[2]);
+scene.add(Rectangle[3]);
+
+// Agregar OrbitControls para mover la cámara
+var orbitControls = new OrbitControls(camera, renderer.domElement);
+
+// RENDERIZADO 
+function render() 
+{
+    requestAnimationFrame(render);
+    renderer.render(scene, camera);
+}
+render();
+}
+init();
+    </script>
+  </body>
+</html>
+   
